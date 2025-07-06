@@ -1,9 +1,6 @@
-package com.stevanovicm.Event_Tracker.Objectsdb;
+package com.stevanovicm.Event_Tracker.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 //Označava da je ova klasa JPA entitet (tj. mapira se na tabelu u bazi) event auto-ddl iz proprties automatski mapira i zna da treba da radi sa ovom kalsom.
@@ -17,8 +14,9 @@ public class Event {
 
     //deklarisali smo kolonu id nase tabele identifikator @id automatski ga pravi da bude jedinstveno
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increment u bazi
     @Column(name = "ID")
-    private  int id;
+    private int id;
 
     //deklarisali smo kolonu za naziv  eventa
     @Column(name = "EVENTNAME")

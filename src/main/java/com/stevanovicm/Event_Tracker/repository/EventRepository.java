@@ -1,5 +1,5 @@
-package com.stevanovicm.Event_Tracker.Repositorys;
-import com.stevanovicm.Event_Tracker.Objectsdb.Event;
+package com.stevanovicm.Event_Tracker.repository;
+import com.stevanovicm.Event_Tracker.entity.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 //EventRepository služi kao apstrakcija između servisa i baze podataka u sustini uradjena je enkapsulacija

@@ -1,6 +1,6 @@
-package com.stevanovicm.Event_Tracker.Services;
-import com.stevanovicm.Event_Tracker.Repositorys.EventRepository;
-import com.stevanovicm.Event_Tracker.Objectsdb.Event;
+package com.stevanovicm.Event_Tracker.service;
+import com.stevanovicm.Event_Tracker.repository.EventRepository;
+import com.stevanovicm.Event_Tracker.entity.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
