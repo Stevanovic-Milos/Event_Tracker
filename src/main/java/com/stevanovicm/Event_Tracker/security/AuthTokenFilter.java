@@ -14,70 +14,75 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
-// Glavni filter za JWT autentikaciju
+//Glavni filter za JWT autentikaciju naslednik OnecPerRequestFilter klase sto znaci da ce se uvek jednom izvrsiti u okviru zahteva odavde koristimo dogilter funkciju
+//zbog konfiguracije spring securitya ova klasa kao nastavik filter klase i zbog zadate konfiguracije u SecurityConfig-u ce se automatski izvrsavati za svaki zahtev
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
 
-  // Utility klasa za rad sa JWT tokenima
+  //Utility klasa za rad sa JWT tokenima
   @Autowired
   private JwtUtil jwtUtils;
 
-  // Service za učitavanje korisničkih podataka
+  //Service za učitavanje korisničkih podataka
   @Autowired
   private UserDetailesService userDetailsService;
 
-  // Centralna metoda za procesiranje svakog zahteva
+  //Centralna metoda za procesiranje svakog zahteva
+  //Ovo je ključna metoda koju moras implementirati kada nasleđujes OncePerRequestFilter. Ona sadrž glavnu logiku vašeg filtera.
   @Override
   protected void doFilterInternal(
-    HttpServletRequest request,
-    HttpServletResponse response,
-    FilterChain filterChain
+    HttpServletRequest request, //Sadrži sve informacije o zahtevu (headere, parametre, body itd.)
+    HttpServletResponse response, //HTTP odgovor koji možete modifikovati
+    FilterChain filterChain // ovo je lanac filtera koji treba nastaviti, obavezno pozvati filterChain.doFilter() da zahtev prođe dalje
   ) throws ServletException, IOException {
     try {
-      // 1. Ekstrakcija JWT tokena iz zahteva
+      //Ekstrakcija JWT tokena iz zahteva
       String jwt = parseJwt(request);
 
-      // 2. Validacija tokena ako postoji
+      //Validacija tokena ako postoji
       if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
 
-        // 3. Dobijanje username-a iz tokena
+        //Dobijanje username-a iz tokena pozivanjem funkcije iz jwtUtil kalse
         String username = jwtUtils.getUsernameFromToken(jwt);
 
-        // 4. Učitavanje korisničkih podataka
+        //Učitavanje korisničkih podataka u nas UserDetails objekat
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        // 5. Kreiranje autentikacionog objekta
+        //Kreiranje autentikacionog objekta kreira se na osnovu podataka iz baze izvucenih iz jwt tokena
         UsernamePasswordAuthenticationToken authentication =
+          //pravimo novi token za authentifikaciju 
           new UsernamePasswordAuthenticationToken(
-            userDetails,
+            userDetails, //ovo su svi podaci o korinku username password itd 
             null,  // credentials su null jer smo već autentifikovani preko JWT
             userDetails.getAuthorities()  // Dodela rola/autorizacija
           );
 
-        // 6. Postavljanje detalja zahteva
+        //Postavljanje detalja zahteva, dodaje informacije o IP adresi, session ID itd.
         authentication.setDetails(
           new WebAuthenticationDetailsSource().buildDetails(request)
         );
 
-        // 7. Čuvanje autentikacije u security kontekstu
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        //Čuvanje autentikacije u security kontekstu 
+        //Omogućava drugim delovima aplikacije da pristupe korisničkim podacima kroz: SecurityContextHolder.getContext().getAuthentication()
+        SecurityContextHolder.getContext().setAuthentication(authentication); 
       }
     } catch (Exception e) {
-      // Logovanje grešaka bez prekida toka zahteva
+      //Logovanje grešaka bez prekida toka zahteva
       System.out.println("Cannot set user authentication: " + e);
     }
 
-    // 8. Nastavljanje filter chain-a
+    //Nastavljanje filter chain-a
+    //Prosleđuje zahtev dalje kroz lanac filtera cak i ako auth nije validan drugi deo koda je zaduzen za obradu neuspelog zahteva
     filterChain.doFilter(request, response);
   }
 
-  // Pomoćna metoda za ekstrakciju JWT tokena iz header-a
+  //Pomoćna metoda za ekstrakciju JWT tokena iz header-a
   private String parseJwt(HttpServletRequest request) {
     String headerAuth = request.getHeader("Authorization");
 
-    // Provera "Bearer" tokena
+    //Provera "Bearer" tokena
     if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
-      // Vraćanje tokena bez "Bearer " prefiksa
+      //Vraćanje tokena bez "Bearer " prefiksa
       return headerAuth.substring(7);
     }
     return null;

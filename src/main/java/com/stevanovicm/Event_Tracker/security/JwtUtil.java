@@ -23,6 +23,7 @@ public class JwtUtil {
   private SecretKey key;  // Kriptografski ključ za potpisivanje
 
   // Inicijalizacija ključa nakon konstrukcije objekta
+  //Ne možemo ovo raditi u konstruktoru jer zavisnosti (poput jwtSecret) možda još nisu spremne spring prvo konstruise objekat pa injektuje zavisnosti i tek na kraju poziva @PostConstruct ali pre nego što bean postane dostupan za upotrebu.
   @PostConstruct
   public void init() {
     this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));

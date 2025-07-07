@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 // Glavna klasa za obradu neuspesnih autentikacija
+// Ova klasa je konfigurisana u SecurityConfig-u i svaki zahtev mora proci kroz nju
 @Component  // Oznacava Spring komponentu
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
