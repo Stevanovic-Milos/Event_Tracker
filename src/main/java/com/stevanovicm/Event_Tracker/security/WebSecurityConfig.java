@@ -37,6 +37,7 @@ public class WebSecurityConfig {
   // Konfiguracija AuthenticationManager-a, glavni interfejs za autentikaciju u Spring Security, ovde ga definisemo kao bean d abi posle mogli smao da ga injektujemo u kontroler za signin
   @Bean
   public AuthenticationManager authenticationManager(
+      //AuthenticationConfiguration je Spring Security klasa koja automatski kreira AuthenticationManager i povezuje ga sa UserService i PasswordEncoder. koji su ovde injektovani to radi jer prepoynaje da kalsa USerService implementira kalsu USerDetailService
     AuthenticationConfiguration authenticationConfiguration
   ) throws Exception {
     return authenticationConfiguration.getAuthenticationManager();
