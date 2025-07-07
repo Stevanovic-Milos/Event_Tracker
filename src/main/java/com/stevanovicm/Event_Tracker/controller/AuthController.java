@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-  //radimo dependency injection authenticationManagera --Glavni interfejs Spring Security-a za autentifikaciju.
+  //radimo dependency injection authenticationManagera --Glavni interfejs Spring Security-a za autentifikaciju. on ne bi mogao da se injektuje ovako da nije u SecurityConfigu
   @Autowired
   AuthenticationManager authenticationManager;
 
@@ -43,6 +43,7 @@ public class AuthController {
   //ova klasa ce vratiti nas response u json formatu kako ga front i ocekuje
   public ResponseEntity<SignInResponse> authenticateUser(@RequestBody User user) {
     //AuthenticationManager je springova klasa koja je glavna za svaku autentifikaciju
+    //AuthenticationManager poziva UserService (metodu loadUserByUsername) da dohvati UserService za dato korisničko ime.
     Authentication authentication = authenticationManager.authenticate(
       //ovde se formira token od podataka koje metoda dobije i taj token sa username i password se trazi u bazi
       //ako nema poklapanja korisnik ne psotoji i vraca se error
@@ -52,7 +53,7 @@ public class AuthController {
       )
     );
 
-    //user details je defaul springova klasa koja vraca osnovne podatke o korisniku
+    //user details je defaul springova klasa koja vraca osnovne podatke o korisniku, moze da ih vrati jer moj servis UserService vec vraca podatke u ovom tipom i u SecuritzConfigu se poziva AuthenticationConfiguration kao deo authenticationManager koji implementira sve metode koje nasledjuju UserDetailService yato je ovo moguce.
     UserDetails userDetails = (UserDetails) authentication.getPrincipal();
     //preko poziva na userDetails zovemo funkciju koja nam vraca username i taj username prosledjujemo nasoj funkciji za kreiranje jwt tokena
     String token = jwtUtils.generateToken(userDetails.getUsername());
@@ -86,7 +87,7 @@ public class AuthController {
     //vracamo status created (201)
     return ResponseEntity
       .status(HttpStatus.CREATED)
-      //poruka je d aje uspesno registrovan a status sucess true
+      //poruka je da je uspesno registrovan a status sucess true
       .body(new Response("User registered successfully", true));
   }
 }
