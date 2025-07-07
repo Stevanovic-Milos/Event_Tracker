@@ -1,15 +1,12 @@
 package com.stevanovicm.Event_Tracker.security;
 
-import com.stevanovicm.Event_Tracker.service.UserDetailesService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -17,36 +14,21 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
+//Generiše konstruktor koji prima sve final polja i polja sa @NonNull anotacijom sto nam olakasava depndeci injection
+@RequiredArgsConstructor
 @Configuration // Označava klasu kao Spring konfiguracionu klasu
-public class WebSecurityConfig {
+public class SecurityConfig {
 
-  // Servis za učitavanje korisničkih detalja
-  @Autowired
-  UserDetailesService userDetailsService;
+  //radimo dependecy injection na elegantan nacin
+  private final AuthenticationProvider authenticationProvider;
 
   // Handler za neautorizovane zahteve, Handler za neuspešne autentikacione zahteve (vraća 401 Unauthorized)
-  @Autowired
-  private AuthEntryPointJwt unauthorizedHandler;
+  private final AuthEntryPointJwt unauthorizedHandler;
 
   // Konfiguracija JWT token filtera, kreira i vraća custom filter za obradu JWT tokena kasnije cemo ga dodati u lanac filtera
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
     return new AuthTokenFilter();
-  }
-
-  // Konfiguracija AuthenticationManager-a, glavni interfejs za autentikaciju u Spring Security, ovde ga definisemo kao bean d abi posle mogli smao da ga injektujemo u kontroler za signin
-  @Bean
-  public AuthenticationManager authenticationManager(
-      //AuthenticationConfiguration je Spring Security klasa koja automatski kreira AuthenticationManager i povezuje ga sa UserService i PasswordEncoder. koji su ovde injektovani to radi jer prepoynaje da kalsa USerService implementira kalsu USerDetailService
-    AuthenticationConfiguration authenticationConfiguration
-  ) throws Exception {
-    return authenticationConfiguration.getAuthenticationManager();
-  }
-
-  // Konfiguracija password encoder-a (BCrypt)
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
   }
 
   //Glavna security konfiguracija
@@ -70,6 +52,8 @@ public class WebSecurityConfig {
       .sessionManagement(sessionManagement ->
         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
       )
+
+      .authenticationProvider(authenticationProvider)
 
       // Autorizacija zahteva
       .authorizeHttpRequests(authorizeRequests ->

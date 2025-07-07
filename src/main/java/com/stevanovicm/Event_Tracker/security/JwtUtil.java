@@ -1,5 +1,6 @@
 package com.stevanovicm.Event_Tracker.security;
 
+import com.stevanovicm.Event_Tracker.entity.User.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -30,13 +31,19 @@ public class JwtUtil {
   }
 
   // Generisanje JWT tokena
-  public String generateToken(String username) {
+  public String generateToken(User user) {
+    //pravimo nas token i ukljucujemo sva navedena polja
     return Jwts.builder()
-      .setSubject(username)  // Postavljanje subjekta (obično username)
-      .setIssuedAt(new Date())  // Vreme kreiranja
-      .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))  // Vreme isteka
-      .signWith(key, SignatureAlgorithm.HS256)  // Potpisivanje tokena
-      .compact();  // Konverzija u string
+      .setSubject(user.getUsername())
+      .claim("userId", user.getId())
+      .claim("firstName", user.getFirstname())
+      .claim("lastName", user.getLastname())
+      .claim("email", user.getEmail())
+      .claim("roles", user.getAuthorities())
+      .setIssuedAt(new Date())
+      .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+      .signWith(key, SignatureAlgorithm.HS256)
+      .compact();
   }
 
   // Dobijanje username-a iz tokena

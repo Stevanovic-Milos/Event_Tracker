@@ -15,10 +15,7 @@ public class Event {
     //deklarisali smo kolonu id nase tabele identifikator @id automatski ga pravi da bude jedinstveno
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increment u bazi
-    @Column(name = "ID")
     private int id;
 
-    //deklarisali smo kolonu za naziv  eventa
-    @Column(name = "EVENTNAME")
     private String eventName;
 }

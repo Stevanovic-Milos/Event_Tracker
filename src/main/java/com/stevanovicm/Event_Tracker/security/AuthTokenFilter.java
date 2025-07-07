@@ -1,6 +1,5 @@
 package com.stevanovicm.Event_Tracker.security;
 
-import com.stevanovicm.Event_Tracker.service.UserDetailesService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -25,7 +25,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
   //Service za učitavanje korisničkih podataka
   @Autowired
-  private UserDetailesService userDetailsService;
+  private UserDetailsService userDetailsService;
 
   //Centralna metoda za procesiranje svakog zahteva
   //Ovo je ključna metoda koju moras implementirati kada nasleđujes OncePerRequestFilter. Ona sadrž glavnu logiku vašeg filtera.
@@ -50,9 +50,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         //Kreiranje autentikacionog objekta kreira se na osnovu podataka iz baze izvucenih iz jwt tokena
         UsernamePasswordAuthenticationToken authentication =
-          //pravimo novi token za authentifikaciju 
+          //pravimo novi token za authentifikaciju
           new UsernamePasswordAuthenticationToken(
-            userDetails, //ovo su svi podaci o korinku username password itd 
+            userDetails, //ovo su svi podaci o korinku username password itd
             null,  // credentials su null jer smo već autentifikovani preko JWT
             userDetails.getAuthorities()  // Dodela rola/autorizacija
           );
@@ -62,9 +62,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
           new WebAuthenticationDetailsSource().buildDetails(request)
         );
 
-        //Čuvanje autentikacije u security kontekstu 
+        //Čuvanje autentikacije u security kontekstu
         //Omogućava drugim delovima aplikacije da pristupe korisničkim podacima kroz: SecurityContextHolder.getContext().getAuthentication()
-        SecurityContextHolder.getContext().setAuthentication(authentication); 
+        SecurityContextHolder.getContext().setAuthentication(authentication);
       }
     } catch (Exception e) {
       //Logovanje grešaka bez prekida toka zahteva
