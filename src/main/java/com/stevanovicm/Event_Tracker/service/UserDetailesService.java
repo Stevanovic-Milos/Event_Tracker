@@ -8,28 +8,30 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 
 @Service // Spring anotacija koja označava klasu kao servisni bean
+//implementiramo userDetailsService klasu radi vracanja spring security objekta
 public class UserDetailesService implements UserDetailsService {
 
   @Autowired
   private UserRepository userRepository; // Injektovan UserRepository za pristup bazi
 
-  // Implementacija ključne metode iz UserDetailsService interfejsa
+  // Klasa implementira Spring Security interfejs UserService, koji ima jednu ključnu metodu: loadUserByUsername. Ova metoda je zadužena za dohvatanje korisničkih podataka na osnovu korisničkog imena tokom procesa autentikacije.
+  // mi cemo ovu metodu prilagoditi nama i nasem User objektu
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-    // 1. Pronalaženje korisnika u bazi po username-u
+    // Pronalaženje korisnika u bazi po username-u
     User user = userRepository.findByUsername(username);
 
-    // 2. Provera da li korisnik postoji
+    // Provera da li korisnik postoji
     if (user == null) {
       throw new UsernameNotFoundException("User Not Found with username: " + username);
     }
 
-    // 3. Kreiranje UserDetails objekta koji Spring Security koristi
+    // Kreiranje UserDetails objekta koji Spring Security koristi
     return new org.springframework.security.core.userdetails.User(
       user.getUsername(), // Korisničko ime
       user.getPassword(), // Hash-ovana lozinka
-      Collections.emptyList() // Lista ovlašćenja (roles) - prazna lista u ovom slučaju
+      Collections.emptyList() // Lista ovlašćenja (roles) - prazna lista za sada
     );
   }
 }
