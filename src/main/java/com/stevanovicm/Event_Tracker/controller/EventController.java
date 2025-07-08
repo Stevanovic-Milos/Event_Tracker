@@ -18,7 +18,6 @@ public class EventController {
 
   @GetMapping
   public ResponseEntity<List<Event>> getAllEvents() {
-    // This will only be reachable if user is authenticated
     return ResponseEntity.ok(eventService.getAllEvents());
   }
 }

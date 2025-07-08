@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,23 +26,19 @@ public class ApplicationConfig {
   //Ovo je glavni servis koji Spring Security koristi za učitavanje korisničkih podataka
   @Bean
   public UserDetailsService userDetailsService() {
-    //Lambda izraz koji definiše kako se nalazi korisnik po username-u
+    //Lambda izraz koji definiše kako se nalazi korisnik po username-u, ovo je u sustini implementacija pretrage koja vraca korisnika opcionalno
     return username -> userRepository.findByUsername(username)
       //Ako korisnik nije pronađen, baca se izuzetak koji Spring Security zna da obradi
       .orElseThrow(()-> new UsernameNotFoundException("user not found"));
   }
 
   //Definisanje AuthenticationProvider bean-a
-  //AuthenticationProvider je glavni interfejs za autentikaciju u Spring Security-ju
+  //AuthenticationProvider je glavni interfejs za autentikaciju u Spring Security-ju u sustini dajmo mu userDetailservice i passwordEncoder vraca authentrifikovanog korisnika
   @Bean
-  public AuthenticationProvider authenticationProvider(){
-    //DaoAuthenticationProvider je implementacija koja koristi UserDetailsService i PasswordEncoder
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    //Postavljanje custom UserDetailsService koji koristi naš UserRepository
-    authProvider.setUserDetailsService(userDetailsService());
-    //Postavljanje password encoder-a za proveru lozinki
-    authProvider.setPasswordEncoder(passwordEncoder());
-    return authProvider;
+  public DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+    provider.setPasswordEncoder(passwordEncoder);
+    return provider;
   }
 
   //Definisanje AuthenticationManager bean-a

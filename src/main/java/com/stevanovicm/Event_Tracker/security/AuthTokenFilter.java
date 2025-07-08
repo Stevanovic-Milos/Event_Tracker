@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,9 +32,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
   //Ovo je ključna metoda koju moras implementirati kada nasleđujes OncePerRequestFilter. Ona sadrž glavnu logiku vašeg filtera.
   @Override
   protected void doFilterInternal(
-    HttpServletRequest request, //Sadrži sve informacije o zahtevu (headere, parametre, body itd.)
-    HttpServletResponse response, //HTTP odgovor koji možete modifikovati
-    FilterChain filterChain // ovo je lanac filtera koji treba nastaviti, obavezno pozvati filterChain.doFilter() da zahtev prođe dalje
+    @NonNull HttpServletRequest request, //Sadrži sve informacije o zahtevu (headere, parametre, body itd.)
+    @NonNull HttpServletResponse response, //HTTP odgovor koji možete modifikovati
+    @NonNull FilterChain filterChain // ovo je lanac filtera koji treba nastaviti, obavezno pozvati filterChain.doFilter() da zahtev prođe dalje
   ) throws ServletException, IOException {
     try {
       //Ekstrakcija JWT tokena iz zahteva

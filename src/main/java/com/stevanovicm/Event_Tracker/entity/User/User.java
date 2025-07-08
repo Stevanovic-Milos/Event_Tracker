@@ -2,12 +2,9 @@ package com.stevanovicm.Event_Tracker.entity.User;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.id.factory.IdentifierGeneratorFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 import java.util.Collection;
 import java.util.List;
 

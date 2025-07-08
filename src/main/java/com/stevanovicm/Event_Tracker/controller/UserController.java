@@ -1,0 +1,18 @@
+package com.stevanovicm.Event_Tracker.controller;
+import com.stevanovicm.Event_Tracker.dto.UserDetailsResponse;
+import com.stevanovicm.Event_Tracker.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/UserDetails")
+public class UserController {
+  private final UserService userService;
+
+  @GetMapping
+  public ResponseEntity<UserDetailsResponse> getCurrentUserDetails() {
+    return ResponseEntity.ok((userService.getCurrentUserDetails()));
+  }
+}
