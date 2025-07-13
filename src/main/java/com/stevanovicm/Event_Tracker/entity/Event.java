@@ -2,20 +2,33 @@ package com.stevanovicm.Event_Tracker.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-//Označava da je ova klasa JPA entitet (tj. mapira se na tabelu u bazi) event auto-ddl iz proprties automatski mapira i zna da treba da radi sa ovom kalsom.
 @Entity
-//nema potrebe za geterima i seterema lobok automatski zavrsi get i set metode za sva polja
-@Data
-//Eksplicitno definiše naziv tabele u bazi (u ovom slučaju Event).
 @Table(name = "EVENTS")
-
+@Data
 public class Event {
 
-    //deklarisali smo kolonu id nase tabele identifikator @id automatski ga pravi da bude jedinstveno
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-increment u bazi
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private String eventName;
+    private String artist;
+    private int availableTickets;
+    private String city;
+    private String country;
+    private String description;
+    private LocalDateTime endDate;
+    private LocalDateTime eventDate;
+    private String eventImageUrl;
+    private String genre;
+    private boolean isSoldOut;
+    private int minAge;
+    private String organizer;
+    private BigDecimal ticketPrice;
+    private String ticketWebsiteUrl;
+    private String venue;
+    private String eventVideoUrl;
 }

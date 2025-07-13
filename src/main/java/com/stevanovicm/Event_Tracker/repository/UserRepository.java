@@ -10,6 +10,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
   //ovo je query metoda koja radi po konvenciji findeBy + ime polja
   Optional<User> findByUsername(String username);
 
+  Optional<User> findById(Long id);
   //proveravamo da li postoji username da bi obavestili korisnika na frontu
   boolean existsByUsername(String username);
 

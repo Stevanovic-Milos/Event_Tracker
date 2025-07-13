@@ -1,10 +1,11 @@
 package com.stevanovicm.Event_Tracker.service;
+import com.stevanovicm.Event_Tracker.dto.EventsResponse;
+import com.stevanovicm.Event_Tracker.dto.SingleEventResponse;
 import com.stevanovicm.Event_Tracker.repository.EventRepository;
 import com.stevanovicm.Event_Tracker.entity.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Optional;
 
 // Oznaka koja kaže Springu da je ova klasa Spring Bean i da treba da je upravlja (kreira instancu i injektuje zavisnosti)
 @Service
@@ -20,37 +21,18 @@ public class EventService {
   }
 
   //Vraca sve Eventove
-  public List<Event> getAllEvents() {
-    return eventRepository.findAll();
+  public EventsResponse getAllEvents() {
+    List<Event> events = eventRepository.findAll();
+    return new EventsResponse(events);
   }
 
   //Nalazi Event na osnovu Id-a
-  public Optional<Event> getEventById(Integer id) {
-    return eventRepository.findById(id);
-  }
-
-  //Kreira novi event
-  public Event createEvent(Event event) {
-    return eventRepository.save(event);
-  }
-
-  //Azurira postojeci Event na osnovu Id-a
-  public Optional<Event> updateEvent(Integer id, Event updatedEvent) {
-    Optional<Event> existingEvent = eventRepository.findById(id);
-    if (existingEvent.isPresent()) {
-      Event event = existingEvent.get();
-      event.setEventName(updatedEvent.getEventName());
-      return Optional.of(eventRepository.save(event));
+  public SingleEventResponse getEventById(Integer eventId) {
+    if(eventRepository.existsById(eventId)){
+      Event event = eventRepository.findById(eventId).orElseThrow();
+      return new SingleEventResponse(event, true);
     }
-    return Optional.empty();
+    return new SingleEventResponse(null, false);
   }
 
-  //Brise event
-  public boolean deleteEvent(Integer id) {
-    if (eventRepository.existsById(id)) {
-      eventRepository.deleteById(id);
-      return true;
-    }
-    return false;
-  }
 }
