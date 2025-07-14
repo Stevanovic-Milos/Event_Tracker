@@ -1,9 +1,11 @@
 package com.stevanovicm.Event_Tracker.entity;
 
+import com.stevanovicm.Event_Tracker.entity.User.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "EVENTS")
@@ -31,4 +33,8 @@ public class Event {
     private String ticketWebsiteUrl;
     private String venue;
     private String eventVideoUrl;
+    @ManyToOne
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
+
 }

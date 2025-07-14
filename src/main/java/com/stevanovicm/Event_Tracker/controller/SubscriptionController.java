@@ -17,12 +17,14 @@ import org.springframework.web.bind.annotation.*;
 public class SubscriptionController {
   private final SubscriptionService subscriptionService;
 
+  //na adresi api/subscriptions pozivamo funkciju iz servisa kojoj prosledjujemo id korinika  ona vrace listu eventova kreiranih od strane tog korisnika
   @GetMapping
   public ResponseEntity<EventsResponse> getEventsForUser(@AuthenticationPrincipal User user) {
-   Long userId = user.getId();
-   return ResponseEntity.ok(subscriptionService.getEventsForUser(userId));
+    Long userId = user.getId();
+    return ResponseEntity.ok(subscriptionService.getEventsForUser(userId));
   }
-  //vadimo id od trenutno ulogovanog korisnika i event koji prosledjujemo
+
+  //vadimo id od trenutno ulogovanog korisnika i event koji prosledjujemo ova funkcija pise u bazu sbscriptions taj event i veze ga sa nasim korisnikom
   @PostMapping("/subscribe")
   public ResponseEntity<Response> subscribeToEvent(@AuthenticationPrincipal User user, @RequestBody SubscribeRequest subscribeRequest) {
     Long userId = user.getId();

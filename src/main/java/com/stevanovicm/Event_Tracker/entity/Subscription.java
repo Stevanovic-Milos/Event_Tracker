@@ -3,8 +3,8 @@ package com.stevanovicm.Event_Tracker.entity;
 import com.stevanovicm.Event_Tracker.entity.User.User;
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.time.LocalDateTime;
+
 
 @Entity
 @Data
@@ -24,4 +24,5 @@ public class Subscription {
   private Event event;
 
   private LocalDateTime subscribedAt;
+
 }

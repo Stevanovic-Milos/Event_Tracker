@@ -23,6 +23,8 @@ public class SubscriptionService {
   private final EventRepository eventRepository;
   private final UserRepository userRepository;
 
+  //ovde vadimo sve eventove iz tabele koji su krirani od strane korisnika ciji id je stigao
+  //prsrecemo protok jer nama trebaju smao eventovi mapiramo tabelu da dobijemo smao eventove kolekciju koju dobijemo prtvaramo u lsitu i vracamo tu listu eventova
   public EventsResponse getEventsForUser(Long userId) {
     List<Event> events = subscriptionRepository.findByUserId(userId)
       .stream()
@@ -32,19 +34,26 @@ public class SubscriptionService {
     return new EventsResponse(events);
   }
 
+  //ovde se upisuje event u bazu sa korisnikom
   public Response subscribeToEvent(Long userId, Integer eventId) {
-    if(subscriptionRepository.existsByUserIdAndEventId(userId, eventId)){
-      return new Response("korisnik je vec prijavljen na event", false);
+    //proveravamo da li su vec povezani u bazi
+    if (subscriptionRepository.existsByUserIdAndEventId(userId, eventId)) {
+      return new Response("Već pratite ovaj event", false);
     }
+    //proveravamo i dodeljujemo korisnika i event koje treba povezati
     User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("korisnik nije pronadjen"));
-    Event event = eventRepository.findById(eventId).orElseThrow(()-> new EntityNotFoundException("event nije pronadjen"));
+    Event event = eventRepository.findById(eventId).orElseThrow(() -> new EntityNotFoundException("event nije pronadjen"));
 
+    //kriramo novu istancu kojoj dodeljujemo dobijena polja
     Subscription subscription = new Subscription();
     subscription.setUser(user);
     subscription.setEvent(event);
+    //vreme postavljamo an trenutno vreme kada je unos kreiran
     subscription.setSubscribedAt(LocalDateTime.now());
+    //cuvamo u bazi
     subscriptionRepository.save(subscription);
 
-    return new Response("korisnik uspesno prijavljen na event", true);
+    //vracamo odogov da je sve proslo dobro
+    return new Response("Uspešno ste zapratili event", true);
   }
 }

@@ -5,9 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface SubscriptionRepository extends JpaRepository <Subscription, Integer>{
-  List<Subscription>findByEventId(Integer eventId);
-  List<Subscription>findByUserId(Long userId);
+public interface SubscriptionRepository extends JpaRepository<Subscription, Integer> {
+  List<Subscription> findByUserId(Long userId);
+
+  void deleteByEventId(Integer eventId);
 
   boolean existsByUserIdAndEventId(Long userId, Integer eventId);
 
