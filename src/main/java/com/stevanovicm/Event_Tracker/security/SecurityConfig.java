@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 import java.util.List;
 
 //Generiše konstruktor koji prima sve final polja i polja sa @NonNull anotacijom sto nam olakasava depndeci injection
@@ -56,12 +57,14 @@ public class SecurityConfig {
       .authenticationProvider(authenticationProvider)
 
       // Autorizacija zahteva
-      .authorizeHttpRequests(authorizeRequests ->
-        authorizeRequests
-          // Dozvoljeni endpointi bez autentikacije
-          .requestMatchers("/api/auth/**").permitAll()
-          // Svi ostali zahtevi zahtevaju autentikaciju
-          .anyRequest().authenticated()
+      .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+        // Dozvoljeni endpointi bez autentikacije
+        .requestMatchers("/api/auth/**").permitAll()
+        //zahtevamo da admin iskljucivo moze pristupiti ovim rutama
+        //automatski prepoznaje ROLE_ADMIN sam doda prefiks
+        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+        // Svi ostali zahtevi zahtevaju autentikaciju
+        .anyRequest().authenticated()
       );
 
     // Dodavanje custom JWT filtera
