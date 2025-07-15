@@ -1,5 +1,6 @@
 package com.stevanovicm.Event_Tracker.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.stevanovicm.Event_Tracker.entity.User.User;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -35,6 +36,8 @@ public class Event {
     private String eventVideoUrl;
     @ManyToOne
     @JoinColumn(name = "created_by_id")
+    //dodali smo ovo kako ne bi svaki put kada vracamo ceo event vracali sve nase podatke o korisniku
+    @JsonIgnore
     private User createdBy;
 
 }
