@@ -1,9 +1,6 @@
 package com.stevanovicm.Event_Tracker.service;
 
-import com.stevanovicm.Event_Tracker.dto.CreateEventRequest;
-import com.stevanovicm.Event_Tracker.dto.EventsResponse;
-import com.stevanovicm.Event_Tracker.dto.Response;
-import com.stevanovicm.Event_Tracker.dto.SingleEventResponse;
+import com.stevanovicm.Event_Tracker.dto.*;
 import com.stevanovicm.Event_Tracker.entity.User.User;
 import com.stevanovicm.Event_Tracker.repository.EventRepository;
 import com.stevanovicm.Event_Tracker.entity.Event;
@@ -12,8 +9,11 @@ import com.stevanovicm.Event_Tracker.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
+import java.util.Optional;
 
 
 // Oznaka koja kaže Springu da je ova klasa Spring Bean i da treba da je upravlja (kreira instancu i injektuje zavisnosti)
@@ -25,6 +25,7 @@ public class EventService {
   private final EventRepository eventRepository;
   private final UserRepository userRepository;
   private final SubscriptionRepository subscriptionRepository;
+  private final EmailSenderService emailSenderService;
 
   //Vraca sve Eventove
   public EventsResponse getAllEvents() {
@@ -42,36 +43,13 @@ public class EventService {
   }
 
   //ovo je funkcija tipa Response sto je nas standardan format responsa sa porukom i boolom sucess koji oznacava da li je nesto uspesno proslo ili ne
-  public Response createEvent(Long userId, CreateEventRequest createEventRequest) {
+  public Response createEvent(Long userId, UpdateCreateEventRequest updateCreateEventRequest) {
     //trzimo korisnika na osnovu prosledjenog id-a ako ga ne nadjemo bacamo gresku (ne bi bilo lose preriaditi na exsist i vracati response s aporukom d anema korisnika za front)
     User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("korisnik nije pronadjen"));
 
-    //inicijalizujemo nas event tip Event kome dodljujemo sve sto dobijamo od CreateEventRequesta koji je nas javni record sa tipovima i podacima koje mozemo ocekivati
+    //inicijalizujemo nas event tip Event
     Event event = new Event();
-    //svakom polju naseg eventa se prkeo seta dodelju vrednost dobijena sa fronta
-    event.setEventName(createEventRequest.eventName());
-    event.setArtist(createEventRequest.artist());
-    event.setAvailableTickets(createEventRequest.availableTickets());
-    event.setCity(createEventRequest.city());
-    event.setCountry(createEventRequest.country());
-    event.setDescription(createEventRequest.description());
-    event.setEndDate(createEventRequest.endDate());
-    event.setEventDate(createEventRequest.eventDate());
-    event.setEventImageUrl(createEventRequest.eventImageUrl());
-    event.setEventVideoUrl(createEventRequest.eventVideoUrl());
-    event.setTicketWebsiteUrl(createEventRequest.ticketWebsiteUrl());
-    event.setGenre(createEventRequest.genre());
-    event.setSoldOut(false);
-    event.setMinAge(createEventRequest.minAge());
-    event.setOrganizer(createEventRequest.organizer());
-    event.setTicketPrice(createEventRequest.ticketPrice());
-    event.setTicketWebsiteUrl(createEventRequest.ticketWebsiteUrl());
-    event.setVenue(createEventRequest.venue());
-    event.setEventVideoUrl(createEventRequest.eventVideoUrl());
-    //ovo bi bilo bolje sve preraditi da bude smao id korisnika kako bi izbegli kada vracamo event da se dobijaju svi podaci o korisniku
-    event.setCreatedBy(user);
-    //cuvamo event
-    eventRepository.save(event);
+    updateEvent(event, updateCreateEventRequest, user);
     //vracamo poruku i sucess
     return new Response("Uspešno kreiran event", true);
   }
@@ -86,7 +64,7 @@ public class EventService {
   @Transactional
   public Response deleteEvent(Integer eventId, Long userId) {
     //radimo proveru da ustanovimo da li dozvoliti korisniku brisanje
-    if (!eventRepository.existsByIdAndCreatedById(eventId, userId)) {
+    if (eventRepository.existsByIdAndCreatedById(eventId, userId)) {
       return new Response("Event ne postoji ili niste njegov kreator", false);
     }
     //trazimo event sa nastim costume kverijem gde vracamo event kome je kreator nas ulogovani korisnik i event id zahtevani event
@@ -96,8 +74,63 @@ public class EventService {
     //brisemo event
     eventRepository.delete(event);
 
+    // pripremamo podatke za mejl trazimo korisnika na osnovu id-a
+    User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("korisnik nije pronadjen"));
+    // priprema poruke
+    String subject="Obrisan event";
+    String body = String.format("Event %s je uspešno obrisan ako vi niste obrisali ovaj event predlžemo vam da izmenite lozinku", event.getEventName());
+
+    //slanje emaila
+    sendEmail(user.getEmail(),subject,body );
+
     //vracamo u nasem standardizovanom response formatu
     return new Response("Event uspešno obrisan", true);
+  }
+
+  public Response updateEventById(UpdateCreateEventRequest updateCreateEventRequest, User user) {
+   Integer eventId = updateCreateEventRequest.eventId();
+    if (!eventRepository.existsByIdAndCreatedById(eventId, user.getId())) {
+      return new Response("Event ne postoji ili niste njegov kreator", false);
+    }
+    Event event = eventRepository.findByIdAndCreatedById(eventId, user.getId());
+
+    updateEvent(event, updateCreateEventRequest, user);
+
+    return new Response("Uspešno izmenjen event", true);
+  }
+
+
+
+  //kreiranje ili editovanje eventa koristi istu funkciju jer je poenta ista kod kreiranja se pravi nova instanca  new Event dok se kod update-a uzima postojeci
+  public void updateEvent(Event event, UpdateCreateEventRequest updateCreateEventRequest, User user) {
+    event.setEventName(updateCreateEventRequest.eventName());
+    event.setArtist(updateCreateEventRequest.artist());
+    event.setAvailableTickets(updateCreateEventRequest.availableTickets());
+    event.setCity(updateCreateEventRequest.city());
+    event.setCountry(updateCreateEventRequest.country());
+    event.setDescription(updateCreateEventRequest.description());
+    event.setEndDate(updateCreateEventRequest.endDate());
+    event.setEventDate(updateCreateEventRequest.eventDate());
+    event.setEventImageUrl(updateCreateEventRequest.eventImageUrl());
+    event.setEventVideoUrl(updateCreateEventRequest.eventVideoUrl());
+    event.setTicketWebsiteUrl(updateCreateEventRequest.ticketWebsiteUrl());
+    event.setGenre(updateCreateEventRequest.genre());
+    event.setSoldOut(Optional.ofNullable(updateCreateEventRequest.soldOut()).orElse(false));
+    event.setMinAge(updateCreateEventRequest.minAge());
+    event.setOrganizer(updateCreateEventRequest.organizer());
+    event.setTicketPrice(updateCreateEventRequest.ticketPrice());
+    event.setTicketWebsiteUrl(updateCreateEventRequest.ticketWebsiteUrl());
+    event.setVenue(updateCreateEventRequest.venue());
+    event.setEventVideoUrl(updateCreateEventRequest.eventVideoUrl());
+    event.setCreatedBy(user);
+    //cuvamo event
+    eventRepository.save(event);
+  }
+
+  // asik funkcija koja se poziva nezavisno (u drugom thredu)
+  @Async
+  public void sendEmail(String to, String subject, String body) {
+    emailSenderService.sendEmail(to, subject, body);
   }
 
 }

@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-import java.util.Optional;
 
 //EventRepository služi kao apstrakcija između servisa i baze podataka u sustini uradjena je enkapsulacija
 public interface EventRepository extends JpaRepository<Event, Integer> {

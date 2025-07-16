@@ -10,6 +10,7 @@ import com.stevanovicm.Event_Tracker.repository.SubscriptionRepository;
 import com.stevanovicm.Event_Tracker.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ public class SubscriptionService {
   private final SubscriptionRepository subscriptionRepository;
   private final EventRepository eventRepository;
   private final UserRepository userRepository;
+  private final EmailSenderService emailSenderService;
 
   //ovde vadimo sve eventove iz tabele koji su krirani od strane korisnika ciji id je stigao
   //prsrecemo protok jer nama trebaju smao eventovi mapiramo tabelu da dobijemo smao eventove kolekciju koju dobijemo prtvaramo u lsitu i vracamo tu listu eventova
@@ -52,8 +54,20 @@ public class SubscriptionService {
     subscription.setSubscribedAt(LocalDateTime.now());
     //cuvamo u bazi
     subscriptionRepository.save(subscription);
+    //pripremamo podatke za mail nakon cuvanja
+    String subject="Uspešno ste zapratili event";
+    String body = String.format("Event %s je uspešno zapraćen", event.getEventName());
+
+    //saljemo mejl
+    sendEmail(user.getEmail(),subject,body);
 
     //vracamo odogov da je sve proslo dobro
     return new Response("Uspešno ste zapratili event", true);
+  }
+
+  //ovo je asinhrona funkcija sto znaci da ce se izvrsavati u nezavisnom thredu
+  @Async
+  public void sendEmail(String to, String subject, String body) {
+    emailSenderService.sendEmail(to, subject, body);
   }
 }
