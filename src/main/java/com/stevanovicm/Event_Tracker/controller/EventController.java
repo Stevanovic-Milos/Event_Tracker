@@ -30,16 +30,14 @@ public class EventController {
   //admin only sekcija u security configu je podeseno da svaki poziv koji kreve sa /api/admin moze pristupiti smao amdin
   // ovde se kreira event dodljuje se user cuopa id i iz tela se uzimaju prkeo naseg dto recorda createeventrequest se slaju svi podaci potrebni servisnoj funkciji
   @PostMapping("admin/events/create")
-  public ResponseEntity<Response> createEvent(@AuthenticationPrincipal User user, @RequestBody CreateEventRequest createEventRequest) {
-    Long userId = user.getId();
-    return ResponseEntity.ok(eventService.createEvent(userId, createEventRequest));
+  public ResponseEntity<Response> createEvent(@AuthenticationPrincipal User user, @RequestBody UpdateCreateEventRequest updateCreateEventRequest) {
+    return ResponseEntity.ok(eventService.createEvent( user.getId(), updateCreateEventRequest));
   }
 
   //ovo je takodje admin poziv kojem smao admin moze pristupiti cupa id iz usera i prosledjumo dlaje servis nam vrati sve eventove koje je krirao zadati korisnik
   @GetMapping("/admin/events/user")
   public ResponseEntity<EventsResponse> getEventsForUser(@AuthenticationPrincipal User user) {
-    Long userId = user.getId();
-    return ResponseEntity.ok(eventService.getEventsCreatedByUser(userId));
+    return ResponseEntity.ok(eventService.getEventsCreatedByUser(user.getId()));
   }
 
   //klasicn rest nacin poziva delete metode koja briose nas event iz urla cupamo eventid koji prosledjujemo servisu zajdeno sa idem korisnika servis proveri
@@ -49,5 +47,13 @@ public class EventController {
 
     return ResponseEntity.ok(eventService.deleteEvent(eventId, user.getId()));
   }
+  // put kontroler je najbolja prkasa koristiti kada se menjaju neke stavke u tabeli
+  // mi ovd ekonkretno zelimo da promenimo neke delove naseg eventa koristicemo put
+  // slacemo sve elemente sa onim koji je izmenjen
+  @PutMapping("admin/events/edit")
+    public ResponseEntity<Response> updateEventById(@RequestBody UpdateCreateEventRequest updateCreateEventRequest, @AuthenticationPrincipal User user) {
+    return ResponseEntity.ok(eventService.updateEventById(updateCreateEventRequest,user));
+  }
+
 
 }
