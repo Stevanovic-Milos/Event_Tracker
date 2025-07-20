@@ -84,7 +84,7 @@ public class SecurityConfig {
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     // Dozvoljeni origin (frontend aplikacija)
-    configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+    configuration.setAllowedOrigins(List.of("https://ritam-grada.netlify.app/","http://localhost:4200"));
     // Dozvoljene HTTP metode
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     // Dozvoljeni svi header-i
