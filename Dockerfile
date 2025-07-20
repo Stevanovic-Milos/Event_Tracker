@@ -1,7 +1,7 @@
 # Build stage
 FROM eclipse-temurin:21-jdk-jammy as builder
 WORKDIR /app
-COPY . .
+COPY src/test/java .
 RUN ./mvnw clean package -DskipTests
 
 # Runtime stage
