@@ -64,7 +64,7 @@ public class EventService {
   @Transactional
   public Response deleteEvent(Integer eventId, Long userId) {
     //radimo proveru da ustanovimo da li dozvoliti korisniku brisanje
-    if (eventRepository.existsByIdAndCreatedById(eventId, userId)) {
+    if (!eventRepository.existsByIdAndCreatedById(eventId, userId)) {
       return new Response("Event ne postoji ili niste njegov kreator", false);
     }
     //trazimo event sa nastim costume kverijem gde vracamo event kome je kreator nas ulogovani korisnik i event id zahtevani event
@@ -95,6 +95,12 @@ public class EventService {
     Event event = eventRepository.findByIdAndCreatedById(eventId, user.getId());
 
     updateEvent(event, updateCreateEventRequest, user);
+
+    String subject="Izmenjen event";
+    String body = String.format("Event %s je uspešno izmenjen ako vi niste izmenili ovaj event predlžemo vam da izmenite lozinku", event.getEventName());
+
+    //slanje emaila
+    sendEmail(user.getEmail(),subject,body );
 
     return new Response("Uspešno izmenjen event", true);
   }
