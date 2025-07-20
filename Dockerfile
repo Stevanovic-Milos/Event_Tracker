@@ -1,27 +1,12 @@
-# Use official Eclipse Temurin (OpenJDK) image for Java 21
-FROM eclipse-temurin:21-jdk-jammy as builder
-
-# Set working directory
+# Build stage (with Maven and JDK)
+FROM maven:3.9.6-openjdk-21 AS builder
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copy only the files needed for Maven to resolve dependencies
-COPY pom.xml .
-COPY src ./src
-
-# Build the application with Maven
-RUN ./mvnw clean package -DskipTests
-
-# Second stage: runtime image
-FROM eclipse-temurin:21-jre-jammy
-
-# Set working directory
+# Runtime stage (with just JRE)
+FROM openjdk:21-jdk-slim
 WORKDIR /app
-
-# Copy the JAR file from the builder stage
 COPY --from=builder /app/target/*.jar app.jar
-
-# Expose the port your app runs on (change if needed)
 EXPOSE 8080
-
-# Command to run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
