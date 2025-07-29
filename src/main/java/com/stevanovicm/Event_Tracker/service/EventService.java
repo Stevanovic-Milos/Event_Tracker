@@ -33,6 +33,10 @@ public class EventService {
     return new EventsResponse(events);
   }
 
+  public Response cron(){
+    return new Response("Cron job ran successfully",true);
+  }
+
   //Nalazi Event na osnovu Id-a
   public SingleEventResponse getEventById(Integer eventId) {
     if (eventRepository.existsById(eventId)) {

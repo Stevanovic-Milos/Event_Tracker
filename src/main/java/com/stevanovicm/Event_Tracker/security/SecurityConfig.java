@@ -59,7 +59,7 @@ public class SecurityConfig {
       // Autorizacija zahteva
       .authorizeHttpRequests(authorizeRequests -> authorizeRequests
         // Dozvoljeni endpointi bez autentikacije
-        .requestMatchers("/api/auth/**").permitAll()
+        .requestMatchers("/api/auth/**", "/api/cron").permitAll()
         //zahtevamo da admin iskljucivo moze pristupiti ovim rutama
         //automatski prepoznaje ROLE_ADMIN sam doda prefiks
         .requestMatchers("/api/admin/**").hasRole("ADMIN")

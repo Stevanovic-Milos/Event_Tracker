@@ -21,6 +21,11 @@ public class EventController {
     return ResponseEntity.ok(eventService.getAllEvents());
   }
 
+  @GetMapping("/cron")
+    public ResponseEntity<Response> keepAwakeRender(){
+      return ResponseEntity.ok(eventService.cron());
+  }
+
   //n ruti api/events/details sa fronta post metodom prosledjujemo id eventa ovde g auzimamo iz request bodija  i prosledjujemo nasoj getEventbyid funkciji, svako moze da joj pristupu
   @PostMapping("events/details")
   public ResponseEntity<SingleEventResponse> getEventById(@RequestBody EventRequest eventRequest) {
